@@ -1,0 +1,5 @@
+export const TECH_MARQUEE = [
+  "REACT", "JAVASCRIPT", "FLUTTER", "NODE.JS", "PYTHON",
+  "FIREBASE", "PHP", "LARAVEL", "MYSQL", "JAVA",
+  "C++", "GIT", "REST API", "MOBILE DEV"
+];
