@@ -40,15 +40,15 @@ export default function Navbar({ activeNav, onNavClick }) {
             </a>
             <a
               href="#experience"
-              onClick={(e) => { e.preventDefault(); onNavClick('home', '#experience'); }}
+              onClick={(e) => { e.preventDefault(); onNavClick('experience'); }}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
             >
               <Briefcase className="w-4 h-4 text-[#00f5d4]" />
               <span className="font-bold text-[11px] uppercase tracking-wider">Experience</span>
             </a>
             <a
-              href="#works"
-              onClick={(e) => { e.preventDefault(); onNavClick('home', '#works'); }}
+              href="#gallery"
+              onClick={(e) => { e.preventDefault(); onNavClick('gallery'); }}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
             >
               <ImageIcon className="w-4 h-4 text-[#fee440]" />
@@ -59,7 +59,7 @@ export default function Navbar({ activeNav, onNavClick }) {
 
         <a
           href="#works"
-          onClick={(e) => { e.preventDefault(); onNavClick('home', '#works'); }}
+          onClick={(e) => { e.preventDefault(); onNavClick('works'); }}
           className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all duration-300 flex items-center gap-1.5 sm:gap-2 ${activeNav === "Works" ? "bg-[#232327] text-white font-bold" : "text-neutral-400 hover:text-white hover:bg-white/5"}`}
         >
           <Sparkles className="w-3.5 h-3.5 opacity-80 hidden md:inline-block" /> Works

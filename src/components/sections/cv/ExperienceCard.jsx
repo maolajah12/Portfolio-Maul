@@ -1,128 +1,147 @@
-import { CircularStamp, BrutalStar, Barcode } from '../../decor';
+import React from 'react';
+import { Barcode, BrutalStar, CircularStamp } from '../../decor';
 
-// KOLOM KANAN: CARD PROFESSIONAL EXPERIENCE (Tekstur Kertas Kusut Panjang)
+const WORK_EXPERIENCES = [
+  {
+    period: 'Sep 2025 - Dec 2025',
+    duration: '4 months',
+    role: 'IT Team (Certified Internship)',
+    company: 'BPJS Ketenagakerjaan Cabang Medan Kota',
+    type: 'MBKM Certified Internship',
+    tasks: [
+      'Designed & developed a real-time data visualization website using Laravel and React to monitor 200 interns.',
+      'Coordinated technical setup and direct assistance for webinars attended by 200 BPJSTK interns.',
+      'Executed WhatsApp blasting campaigns for BPJSTK bill processing & compiled periodic JMO analytical reports.',
+    ],
+    tools: 'Laravel, React, Vite, Git, VS Code, Excel',
+  },
+  {
+    period: 'June 2025 - July 2025',
+    duration: '2 months',
+    role: 'Archive Center Division (Intern)',
+    company: 'PT. Bank Sumut',
+    type: 'Internship',
+    tasks: [
+      'Maintained & enhanced the archive database web system using CodeIgniter and PHP (major frontend & data entry repairs).',
+      'Processed and entered 500 archive records into the MySQL database with strict accuracy.',
+      'Verified and aligned 500 physical archive documents with their designated storage status.',
+    ],
+    tools: 'CodeIgniter, PHP, MySQL, VS Code, Excel',
+  },
+  {
+    period: 'June 2020 - Now',
+    duration: 'Active',
+    role: 'Vector Artist',
+    company: 'Freelance',
+    type: 'Independent Creative',
+    tasks: [
+      'Created and marketed vector-based digital artworks across multiple online platforms using Infinite Design & MediBang.',
+      'Delivered bespoke vector illustration services in diverse styles (anime, cartoon) customized to client briefs.',
+    ],
+    tools: 'Infinite Design, MediBang, Vector Illustration',
+  },
+];
+
 export default function ExperienceCard() {
   return (
-    <div id="experience" className="lg:col-span-6 relative flex justify-center lg:justify-end mt-6 lg:mt-16 scroll-mt-28">
+    <div className="relative w-full max-w-md mx-auto lg:mx-0 lg:-ml-4 lg:mt-6 z-20 select-none">
+      {/* Stempel Melingkar di Kanan Atas */}
+      <div className="absolute -top-14 -right-6 z-30 hidden sm:block">
+        <CircularStamp className="w-32 h-32" withRedCenter />
+      </div>
 
-      {/* Mahkota Ledakan Merah di Atas Card Experience */}
-      <svg viewBox="0 0 120 80" className="w-24 h-16 absolute -top-12 left-8 sm:left-16 stroke-[#ff1e56] fill-none z-0" strokeWidth="3">
-        <path d="M10 70 L25 20 L50 55 L65 10 L85 55 L110 25 L100 70" />
+      {/* Doodle Mahkota Merah di Kiri Atas */}
+      <svg
+        viewBox="0 0 100 60"
+        className="w-20 h-14 text-[#ff1e56] absolute -top-12 left-4 z-20 pointer-events-none"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3.5"
+      >
+        <path d="M10 50 L20 15 L40 40 L55 8 L70 40 L90 18 L80 50 Z" />
       </svg>
 
-      {/* Stempel Melingkar di Pojok Kanan Atas Card Experience */}
-      <div className="absolute -top-14 -right-6 sm:-right-8 z-30">
-        <CircularStamp
-          size={125}
-          centerIcon={
-            <div className="w-8 h-8 rounded-full border-2 border-[#ff1e56] flex items-center justify-center">
-              <div className="w-4 h-0.5 bg-[#ff1e56] rotate-45" />
-            </div>
-          }
-        />
-      </div>
-
-      {/* Bintang Ledakan Putih di Sisi Kanan Card */}
-      <BrutalStar color="white" points={12} className="w-20 h-20 absolute bottom-20 -right-8 z-30 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]" />
-
-      {/* CARD EXPERIENCE */}
-      <div className="relative z-20 w-full max-w-md crumpled-paper text-black p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.95)] border border-white/40">
-
-        {/* Header Professional Experience */}
-        <div className="text-center mb-6">
-          <span className="font-sans-tech text-xs tracking-widest lowercase block text-neutral-700 -mb-1">
+      {/* Kartu Kertas Kusut (Dengan Fallback bg-[#e6e6e6] + Inline Texture) */}
+      <div
+        className="relative bg-[#e6e6e6] text-[#0c0c0c] p-7 sm:p-10 shadow-[0_30px_70px_rgba(0,0,0,0.85)]"
+        style={{
+          backgroundImage: `
+            radial-gradient(at 18% 28%, rgba(255, 255, 255, 0.85) 0px, transparent 50%),
+            radial-gradient(at 82% 22%, rgba(0, 0, 0, 0.08) 0px, transparent 40%),
+            radial-gradient(at 38% 72%, rgba(0, 0, 0, 0.09) 0px, transparent 45%),
+            radial-gradient(at 88% 84%, rgba(255, 255, 255, 0.75) 0px, transparent 50%),
+            linear-gradient(125deg, rgba(0, 0, 0, 0.04) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.06) 50%, rgba(0, 0, 0, 0.06) 75%, transparent 75%, transparent)
+          `,
+        }}
+      >
+        {/* Header Experience */}
+        <div className="text-center mb-8">
+          <span className="font-mono text-xs lowercase tracking-widest text-zinc-700 block mb-1">
             professional
           </span>
-          <div className="inline-block bg-black text-white px-4 py-1 mt-1">
-            <span className="font-display font-black text-xl sm:text-2xl tracking-[0.18em] uppercase">
-              EXPERIENCE
-            </span>
+          <div className="inline-block bg-[#0c0c0c] text-white px-5 py-1 font-syne font-black text-xl sm:text-2xl tracking-wider uppercase">
+            EXPERIENCE
           </div>
         </div>
-
-        <div className="border-t-2 border-dashed border-black/40 my-4" />
 
         {/* Daftar Pengalaman Kerja */}
-        <div className="space-y-6 font-sans-tech text-xs sm:text-sm">
+        <div className="space-y-6">
+          {WORK_EXPERIENCES.map((exp, idx) => (
+            <div
+              key={idx}
+              className="border-b-2 border-dashed border-zinc-400 pb-5 last:border-none"
+            >
+              <div className="flex items-center justify-between text-xs font-mono font-bold text-[#0c0c0c] mb-1">
+                <span>{exp.period}</span>
+                {exp.duration && (
+                  <span className="text-zinc-600 font-normal">{exp.duration}</span>
+                )}
+              </div>
 
-          {/* Job 1 */}
-          <div>
-            <div className="flex justify-between items-baseline font-bold">
-              <span>2022</span>
-              <span className="text-[11px] font-normal text-neutral-700">6 months</span>
+              <h4 className="font-syne font-extrabold text-base sm:text-lg text-[#0c0c0c] leading-snug">
+                {exp.role}
+              </h4>
+
+              {exp.company && (
+                <p className="font-sans font-bold text-xs sm:text-sm text-zinc-800">
+                  {exp.company}
+                </p>
+              )}
+
+              {exp.type && (
+                <span className="font-mono text-[11px] text-zinc-600 italic block mb-2">
+                  {exp.type}
+                </span>
+              )}
+
+              <ul className="mt-2 space-y-1 text-xs text-zinc-800 leading-relaxed">
+                {exp.tasks.map((task, tIdx) => (
+                  <li key={tIdx} className="flex items-start gap-1.5">
+                    <span className="text-[#ff1e56] font-bold">-</span>
+                    <span>{task}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {exp.tools && (
+                <div className="mt-2.5 pt-1.5 border-t border-black/15 font-mono text-[10px] text-zinc-700">
+                  <strong className="text-[#0c0c0c]">TOOLS:</strong> {exp.tools}
+                </div>
+              )}
             </div>
-            <div className="font-bold text-neutral-900">
-              Graphic Designer & Illustrator
-            </div>
-            <div className="text-xs text-neutral-800 font-medium">
-              Local Nature Reserve of Paul de Tornada
-            </div>
-            <div className="text-[11px] italic text-neutral-600 mb-2">internship</div>
-            <ul className="text-xs text-neutral-800 space-y-0.5 pl-2 border-l-2 border-black/30">
-              <li>- Advertisement Materials</li>
-              <li>- Social media content</li>
-              <li>- Branding</li>
-              <li>- Illustration</li>
-            </ul>
-          </div>
-
-          <div className="border-t border-dashed border-black/30" />
-
-          {/* Job 2 */}
-          <div>
-            <div className="font-bold">2020 - Now</div>
-            <div className="font-bold text-neutral-900 mb-1.5">Freelancer</div>
-            <ul className="text-xs text-neutral-800 space-y-0.5 pl-2 border-l-2 border-black/30">
-              <li>- Design</li>
-              <li>- Album artworks</li>
-              <li>- Illustrations</li>
-            </ul>
-          </div>
-
-          <div className="border-t border-dashed border-black/30" />
-
-          {/* Job 3 */}
-          <div>
-            <div className="flex justify-between items-baseline font-bold">
-              <span>2018 - 2019</span>
-              <span className="text-[11px] font-normal text-neutral-700">3 months</span>
-            </div>
-            <div className="font-bold text-neutral-900">Graphic Designer</div>
-            <div className="text-xs text-neutral-800 font-medium">MoonOp Brand Agency</div>
-            <div className="text-[11px] italic text-neutral-600 mb-2">internship</div>
-            <ul className="text-xs text-neutral-800 space-y-0.5 pl-2 border-l-2 border-black/30">
-              <li>- Branding</li>
-              <li>- Motion Design</li>
-              <li>- Video editing and post-production</li>
-            </ul>
-          </div>
-
-          <div className="border-t border-dashed border-black/30" />
-
-          {/* Job 4 */}
-          <div>
-            <div className="flex justify-between items-baseline font-bold">
-              <span>2018</span>
-              <span className="text-[11px] font-normal text-neutral-700">3 months</span>
-            </div>
-            <div className="font-bold text-neutral-900">Multimedia Technician</div>
-            <div className="text-xs text-neutral-800 font-medium">Arte Estúdio Imaginário</div>
-            <div className="text-[11px] italic text-neutral-600 mb-2">internship</div>
-            <ul className="text-xs text-neutral-800 space-y-0.5 pl-2 border-l-2 border-black/30">
-              <li>- 2D Animation</li>
-              <li>- Stop-motion Animation</li>
-              <li>- Video editing and post-production</li>
-            </ul>
-          </div>
-
+          ))}
         </div>
 
-        <div className="border-t-2 border-dashed border-black/40 my-5" />
+        {/* Bintang Brutalist di Tepi Kanan */}
+        <div className="absolute bottom-24 -right-5 z-30">
+          <BrutalStar className="w-12 h-12 text-white drop-shadow-lg" />
+        </div>
 
         {/* Barcode Bawah */}
-        <Barcode />
+        <div className="mt-8 flex justify-center">
+          <Barcode className="w-60 h-11" color="#0c0c0c" />
+        </div>
       </div>
-
     </div>
   );
 }

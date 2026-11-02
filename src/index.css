@@ -276,3 +276,132 @@ html {
     stroke-dashoffset: 0;
   }
 }
+
+/* ===== Doodle CV ===== */
+@keyframes doodleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.doodle-float {
+  animation: doodleFloat 3.2s ease-in-out infinite;
+}
+
+@keyframes doodleWiggle {
+
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+.doodle-wiggle {
+  animation: doodleWiggle 1.6s ease-in-out infinite;
+}
+
+@keyframes doodleTwinkle {
+
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+.doodle-twinkle {
+  animation: doodleTwinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes doodleFlicker {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  8% {
+    opacity: 0.2;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  55% {
+    opacity: 1;
+  }
+
+  58% {
+    opacity: 0.35;
+  }
+
+  62% {
+    opacity: 1;
+  }
+}
+
+.doodle-flicker {
+  animation: doodleFlicker 2.6s steps(1) infinite;
+}
+
+@keyframes doodleSquiggle {
+  0% {
+    stroke-dashoffset: 1;
+  }
+
+  50% {
+    stroke-dashoffset: 0;
+  }
+
+  100% {
+    stroke-dashoffset: -1;
+  }
+}
+
+.doodle-squiggle {
+  stroke-dasharray: 1;
+  animation: doodleSquiggle 3.6s ease-in-out infinite;
+}
+
+@keyframes doodleDash {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+.doodle-dash {
+  stroke-dasharray: 7 9;
+  animation: doodleDash 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .doodle-float,
+  .doodle-wiggle,
+  .doodle-twinkle,
+  .doodle-flicker,
+  .doodle-squiggle,
+  .doodle-dash {
+    animation: none;
+  }
+
+  .doodle-squiggle {
+    stroke-dashoffset: 0;
+  }
+}

@@ -1,15 +1,29 @@
+import { useEffect, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { SKILLS_LIST } from '../../data/skills.js';
 
 // BAGIAN BAWAH: RODA KARTU BERPUTAR MELENGKUNG (ARCH CAROUSEL)
+// Skala roda mengikuti lebar layar: penuh di tablet/desktop, mengecil (min 0.6) di HP
+const wheelScale = () => (typeof window === 'undefined' ? 1 : Math.min(1, Math.max(0.6, window.innerWidth / 760)));
+
 export default function SkillWheel({ rotation, onPauseChange, onSelectSkill }) {
+  const [scale, setScale] = useState(wheelScale);
+  useEffect(() => {
+    const on = () => setScale(wheelScale());
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
+
   return (
-    <div className="relative isolate w-full h-[56vh] min-h-[560px] flex justify-center overflow-hidden">
+    <div
+      className="relative isolate w-full h-[56vh] min-h-[560px] flex justify-center overflow-hidden"
+      style={scale < 1 ? { height: `${Math.round(560 * scale)}px`, minHeight: 0 } : undefined}
+    >
 
       {/* POROS TUNGGAL RODA & LINGKARAN BAWAH */}
       <div
         className="absolute left-1/2 -translate-x-1/2 w-0 h-0 flex items-center justify-center z-20"
-        style={{ bottom: '-120px' }}
+        style={{ bottom: `${-120 * scale}px`, transform: `translateX(-50%) scale(${scale})`, transformOrigin: '0 0' }}
       >
         {/* CONTAINER RODA KARTU YANG BERPUTAR */}
         <div
@@ -45,8 +59,8 @@ export default function SkillWheel({ rotation, onPauseChange, onSelectSkill }) {
                 }}
               >
                 <div
-                  onMouseEnter={() => onPauseChange(true)}
-                  onMouseLeave={() => onPauseChange(false)}
+                  onPointerEnter={(e) => e.pointerType === 'mouse' && onPauseChange(true)}
+                  onPointerLeave={(e) => e.pointerType === 'mouse' && onPauseChange(false)}
                   onClick={() => onSelectSkill(idx, skill)}
                   className={`w-full h-full rounded-[1.6rem] p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 cursor-pointer hover:-translate-y-5 hover:scale-105 overflow-hidden relative group ${themeClass}`}
                 >

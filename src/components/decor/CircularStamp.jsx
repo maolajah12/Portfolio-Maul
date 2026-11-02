@@ -11,7 +11,7 @@ export default function CircularStamp({ className = "", size = 130, textColor = 
         </defs>
         <text fill={textColor} className="font-display font-black uppercase tracking-[0.26em] text-[15px]">
           <textPath href="#textCircle" startOffset="0%">
-            • DESIGNER • ILLUSTRATOR • ARTIST 
+            • DEVELOPER • WEB • MOBILE
           </textPath>
         </text>
       </svg>

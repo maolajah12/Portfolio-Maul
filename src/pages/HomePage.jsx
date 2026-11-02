@@ -13,10 +13,8 @@ export default function HomePage({ onSelectProject }) {
       <Hero />
       <About />
       <CV />
-      <Works onSelectProject={onSelectProject} />
       <TechMarquee />
       <Contact />
-      <Footer />
     </main>
   );
 }
