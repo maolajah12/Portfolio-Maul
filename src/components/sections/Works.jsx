@@ -22,11 +22,10 @@ export default function Works({ onSelectProject }) {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 text-xs font-sans-tech uppercase tracking-wider border transition-all ${
-                selectedCategory === cat
-                  ? "bg-[#ff1e56] text-white border-[#ff1e56] font-bold shadow-[3px_3px_0px_white]"
-                  : "bg-black/60 text-neutral-300 border-white/30 hover:border-white"
-              }`}
+              className={`px-3.5 py-1.5 text-xs font-sans-tech uppercase tracking-wider border transition-all ${selectedCategory === cat
+                ? "bg-[#ff1e56] text-white border-[#ff1e56] font-bold shadow-[3px_3px_0px_white]"
+                : "bg-black/60 text-neutral-300 border-white/30 hover:border-white"
+                }`}
             >
               {cat}
             </button>

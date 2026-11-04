@@ -488,11 +488,24 @@ export default function Hero() {
             {/* ==================== PHASE 1: GATE ==================== */}
             {phase === 'gate' && (
               <>
+                {/* Animasi RAKIT: tiap bagian muncul bergantian lalu terpasang jadi satu tombol utuh */}
+                <style>{`
+                  @keyframes ga-snap { from { opacity: 0; transform: scale(1.6) rotate(-10deg); filter: blur(8px); } to { opacity: 1; transform: scale(1) rotate(-3deg); filter: blur(0); } }
+                  @keyframes ga-drop { 0% { opacity: 0; transform: translateY(-80px) rotate(-5deg) scale(.96); } 55% { opacity: 1; transform: translateY(8px) rotate(.8deg); } 78% { transform: translateY(-3px) rotate(-.2deg); } 100% { opacity: 1; transform: none; } }
+                  @keyframes ga-screw { from { opacity: 0; transform: scale(2.4) rotate(-300deg); } to { opacity: 1; transform: none; } }
+                  @keyframes ga-slide { from { opacity: 0; transform: translateX(-26px); clip-path: inset(0 100% 0 0); } to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); } }
+                  @keyframes ga-rise { from { opacity: 0; transform: translateY(30px) scale(.55); } 70% { opacity: 1; transform: translateY(-3px) scale(1.04); } to { opacity: 1; transform: none; } }
+                  @keyframes ga-cap { 0% { opacity: 0; transform: translateY(-52px) scale(1.18); } 62% { opacity: 1; transform: translateY(5px) scale(.97); } 100% { opacity: 1; transform: translateY(-5px) scale(1); } }
+                  @keyframes ga-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+                  @media (prefers-reduced-motion: reduce) { .ga { animation: none !important; } }
+                `}</style>
+
                 <span
-                  className={`font-marker text-2xl sm:text-3xl -rotate-3 transition-colors ${smashing ? 'text-black' : 'text-white/80'
+                  className={`ga font-marker text-2xl sm:text-3xl -rotate-3 transition-colors ${smashing ? 'text-black' : 'text-white/80'
                     }`}
+                  style={{ animation: 'ga-snap .65s cubic-bezier(.2,1.1,.3,1) .05s backwards' }}
                 >
-                  Maulana Al Ghifari
+                  are you ready?
                 </span>
 
                 {/* TOMBOL MEKANIK "PRESS TO ENTER" */}
@@ -513,21 +526,22 @@ export default function Hero() {
                       smashEnter();
                     }
                   }}
-                  className={`group relative w-full max-w-md bg-[#e6e6e6] border-[3px] border-[#0c0c0c] p-5 sm:p-6 cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-white/50 transition-all duration-75 ${activeDown
+                  style={{ animation: 'ga-drop .75s cubic-bezier(.2,1,.3,1) .35s backwards' }}
+                  className={`ga group relative w-full max-w-md bg-[#e6e6e6] border-[3px] border-[#0c0c0c] p-5 sm:p-6 cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-white/50 transition-all duration-75 ${activeDown
                     ? 'translate-x-[3px] translate-y-[3px] shadow-[3px_3px_0_#ff1e56] bg-[#dcdcdc]'
                     : 'shadow-[8px_8px_0_#ff1e56] hover:bg-white hover:-translate-y-1'
                     }`}
                 >
                   {/* Baut sudut */}
-                  <span className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" />
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" />
-                  <span className="absolute bottom-2 left-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" />
-                  <span className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" />
+                  <span className="ga absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" style={{ animation: 'ga-screw .35s ease-out 0.85s backwards' }} />
+                  <span className="ga absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" style={{ animation: 'ga-screw .35s ease-out 0.94s backwards' }} />
+                  <span className="ga absolute bottom-2 left-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" style={{ animation: 'ga-screw .35s ease-out 1.03s backwards' }} />
+                  <span className="ga absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" style={{ animation: 'ga-screw .35s ease-out 1.12s backwards' }} />
 
                   <div className="flex items-center justify-between gap-4">
                     {/* Teks kiri */}
                     <div className="flex flex-col gap-1.5 text-left">
-                      <span className="font-mono font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 mb-1">
+                      <span className="ga font-mono font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 mb-1" style={{ animation: 'ga-slide .45s ease-out 0.95s backwards' }}>
                         <span
                           className={`w-2.5 h-2.5 rounded-full border border-[#0c0c0c] transition-colors duration-75 ${activeDown
                             ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]'
@@ -539,30 +553,34 @@ export default function Hero() {
                         </span>
                       </span>
                       <span className="font-display font-black text-3xl sm:text-4xl text-[#0c0c0c] uppercase tracking-tighter leading-[0.88]">
-                        PRESS
-                        <br />
-                        TO ENTER
+                        <span className="ga block" style={{ animation: 'ga-slide .5s cubic-bezier(.2,.9,.3,1) 1.05s backwards' }}>PRESS</span>
+                        <span className="ga block" style={{ animation: 'ga-slide .5s cubic-bezier(.2,.9,.3,1) 1.2s backwards' }}>TO ENTER</span>
                       </span>
                     </div>
 
                     {/* Mekanisme tombol 3D */}
                     <div className="relative w-24 h-24 flex items-center justify-center shrink-0 scale-110">
                       {!activeDown && (
-                        <div className="absolute inset-x-3 bottom-2 h-[68px] rounded-full bg-[#ff1e56]/40 animate-ping" />
+                        <div className="ga absolute inset-0" style={{ animation: 'ga-fade .4s ease-out 1.95s backwards' }}>
+                          <div className="absolute inset-x-3 bottom-2 h-[68px] rounded-full bg-[#ff1e56]/40 animate-ping" />
+                        </div>
                       )}
                       <div
-                        className={`absolute inset-x-1 bottom-0 h-20 rounded-full bg-[#9ea3a8] border-[3px] border-[#0c0c0c] transition-shadow duration-75 ${activeDown
+                        style={{ animation: 'ga-rise .5s cubic-bezier(.2,1,.3,1) 1.1s backwards' }}
+                        className={`ga absolute inset-x-1 bottom-0 h-20 rounded-full bg-[#9ea3a8] border-[3px] border-[#0c0c0c] transition-shadow duration-75 ${activeDown
                           ? 'shadow-[0_2px_0_#0c0c0c]'
                           : 'shadow-[0_7px_0_#0c0c0c,0_12px_18px_rgba(0,0,0,0.45)]'
                           }`}
                       />
-                      <div className="absolute inset-x-2.5 bottom-1.5 h-[68px] rounded-full bg-[#18181b] border-2 border-[#0c0c0c]" />
+                      <div className="ga absolute inset-x-2.5 bottom-1.5 h-[68px] rounded-full bg-[#18181b] border-2 border-[#0c0c0c]" style={{ animation: 'ga-rise .45s cubic-bezier(.2,1,.3,1) 1.25s backwards' }} />
                       <div
-                        className={`absolute inset-x-3 bottom-2.5 rounded-full bg-[#7a001e] border-x-[3px] border-b-[3px] border-[#0c0c0c] transition-all duration-75 ease-out ${activeDown ? 'h-[58px]' : 'h-[72px]'
+                        style={{ animation: 'ga-rise .45s cubic-bezier(.2,1,.3,1) 1.4s backwards' }}
+                        className={`ga absolute inset-x-3 bottom-2.5 rounded-full bg-[#7a001e] border-x-[3px] border-b-[3px] border-[#0c0c0c] transition-all duration-75 ease-out ${activeDown ? 'h-[58px]' : 'h-[72px]'
                           }`}
                       />
                       <div
-                        className={`relative z-10 w-[72px] h-[64px] rounded-full bg-[#ff1e56] border-[3px] border-[#0c0c0c] flex items-center justify-center transition-all duration-75 ease-out ${activeDown
+                        style={{ animation: 'ga-cap .6s cubic-bezier(.3,1,.4,1) 1.55s backwards' }}
+                        className={`ga relative z-10 w-[72px] h-[64px] rounded-full bg-[#ff1e56] border-[3px] border-[#0c0c0c] flex items-center justify-center transition-all duration-75 ease-out ${activeDown
                           ? 'translate-y-[9px] bg-[#e01145] shadow-[inset_0_4px_8px_rgba(0,0,0,0.55)] scale-[0.97]'
                           : '-translate-y-[5px] group-hover:-translate-y-[7px] shadow-[inset_0_-7px_0_#b8002e,inset_0_4px_0_rgba(255,255,255,0.45)]'
                           }`}
@@ -578,13 +596,14 @@ export default function Hero() {
                   </div>
                 </div>
 
-                <span className="font-sans-tech text-[11px] uppercase tracking-[0.3em] text-neutral-500">
+                <span className="ga font-sans-tech text-[11px] uppercase tracking-[0.3em] text-neutral-500" style={{ animation: 'ga-fade .5s ease-out 2.05s backwards' }}>
                   atau tekan Enter
                 </span>
 
                 <button
                   onClick={skipSound}
-                  className="-mt-3 font-sans-tech text-xs uppercase tracking-widest text-neutral-500 hover:text-white underline underline-offset-4 transition-colors"
+                  style={{ animation: 'ga-fade .5s ease-out 2.2s backwards' }}
+                  className="ga -mt-3 font-sans-tech text-xs uppercase tracking-widest text-neutral-500 hover:text-white underline underline-offset-4 transition-colors"
                 >
                   Masuk tanpa suara
                 </button>

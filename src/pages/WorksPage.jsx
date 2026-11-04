@@ -514,8 +514,8 @@ function BrutalProjectDetailModal({ project, onClose }) {
                                         }}
                                         aria-label={`Go to slide ${idx + 1}`}
                                         className={`h-2 transition-all duration-300 cursor-pointer ${idx === currentImageIndex
-                                                ? 'w-7 bg-[#ff1e56]'
-                                                : 'w-2.5 bg-white/35 hover:bg-white/70'
+                                            ? 'w-7 bg-[#ff1e56]'
+                                            : 'w-2.5 bg-white/35 hover:bg-white/70'
                                             }`}
                                     />
                                 ))}
@@ -1125,8 +1125,8 @@ export default function WorksPage() {
                                 type="button"
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`px-3.5 py-2 text-xs font-mono uppercase tracking-wider border-2 transition-all cursor-pointer ${selectedCategory === cat
-                                        ? 'bg-[#ff1e56] text-white border-[#ff1e56] font-bold shadow-[4px_4px_0px_white]'
-                                        : 'bg-[#141414] text-neutral-300 border-zinc-700 hover:border-white hover:text-white'
+                                    ? 'bg-[#ff1e56] text-white border-[#ff1e56] font-bold shadow-[4px_4px_0px_white]'
+                                    : 'bg-[#141414] text-neutral-300 border-zinc-700 hover:border-white hover:text-white'
                                     }`}
                             >
                                 {cat}

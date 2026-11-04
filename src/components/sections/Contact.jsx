@@ -17,10 +17,10 @@ export default function Contact() {
     setIsSending(true);
     setErrorMessage("");
 
-    // Kredensial EmailJS Anda yang sudah terintegrasi
-    const SERVICE_ID = "service_naznen123";
-    const TEMPLATE_ID = "template_col7w9l";
-    const PUBLIC_KEY = "3ul2xbbrDl7mvELVF";
+    // Kredensial EmailJS dari Environment Variables
+    const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY)
       .then((result) => {

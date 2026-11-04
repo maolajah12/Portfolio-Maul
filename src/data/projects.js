@@ -100,4 +100,4 @@ export const PROJECTS_DATA = [
     tools: ['Laravel', 'React.Js', 'PHP', 'MySQL'],
     tags: ['Laravel', 'React.Js', 'PHP', 'MySQL'],
   },
-];
+]; 
