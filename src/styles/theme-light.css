@@ -1,0 +1,484 @@
+/* ==========================================================================
+   MODE CERAH — putih keabu-abuan yang lembut.
+   Aktif saat <html data-theme="light">. Mode gelap tidak diubah sama sekali.
+
+   Bagian 1 (di atas garis "DIHASILKAN") ditulis tangan: token warna dan pengecualian.
+   Bagian 2 (di bawah) dihasilkan dari kelas Tailwind yang dipakai di src/.
+   ========================================================================== */
+
+html[data-theme="light"] {
+    color-scheme: light;
+    --lt-bg: #e8e9ec;
+    /* latar halaman: abu-abu kebiruan lembut */
+    --lt-surface: #f3f3f5;
+    /* kartu & panel */
+    --lt-pill: #dcdde2;
+    /* item aktif di navbar */
+    --lt-ink: #16161a;
+    /* teks utama */
+    --lt-ink2: #4a4b54;
+    /* teks sekunder */
+    --lt-ink3: #666772;
+    /* teks tersier */
+    --lt-line-strong: rgba(22, 22, 26, 0.28);
+    --lt-accent-text: #d70f45;
+    /* merah aksen untuk teks kecil (kontras lebih baik) */
+}
+
+html[data-theme="light"] body {
+    background-color: var(--lt-bg);
+    color: var(--lt-ink);
+}
+
+/* Tekstur titik halus */
+html[data-theme="light"] .bg-noise {
+    background-image: radial-gradient(rgba(22, 22, 26, 0.07) 1px, transparent 0);
+}
+
+/* Kilap plastik: pada permukaan terang cukup dilembutkan */
+html[data-theme="light"] .plastic-glare {
+    opacity: 0.55;
+}
+
+/* Garis hairline kecil buatan sendiri (mis. pemisah navbar) */
+html[data-theme="light"] .selection\:bg-\[\#ff1e56\] ::selection,
+html[data-theme="light"] ::selection {
+    background: #ff1e56;
+    color: #fff;
+}
+
+/* ---------- PENGECUALIAN: teks putih yang memang berada di atas warna gelap/aksen ---------- */
+html[data-theme="light"] :is(.bg-\[\#7a001e\], .bg-\[\#e01145\], .bg-\[\#ff1e56\], .bg-\[\#ff1e56\]\/40, .bg-black, .bg-black\/10, .bg-black\/15, .bg-black\/45, .bg-black\/5, .bg-black\/60, .bg-black\/75, .bg-black\/80, .bg-black\/85, .bg-black\/90).text-white,
+html[data-theme="light"] :is(.bg-\[\#7a001e\], .bg-\[\#e01145\], .bg-\[\#ff1e56\], .bg-\[\#ff1e56\]\/40, .bg-black, .bg-black\/10, .bg-black\/15, .bg-black\/45, .bg-black\/5, .bg-black\/60, .bg-black\/75, .bg-black\/80, .bg-black\/85, .bg-black\/90) .text-white {
+    color: #fff;
+}
+
+/* Label hitam kecil (mis. "2025", nomor foto): tetap hitam berteks putih */
+html[data-theme="light"] .bg-\[\#0c0c0c\].text-white:not(.min-h-screen) {
+    background-color: #0c0c0c;
+    color: #fff;
+}
+
+html[data-theme="light"] .bg-\[\#0c0c0c\].text-white:not(.min-h-screen) .text-white {
+    color: #fff;
+}
+
+/* Animasi kunci serpihan huruf "WORKS": putih -> merah -> putih, versi gelap untuk mode cerah */
+@keyframes piece-lock-light {
+
+    0%,
+    74% {
+        color: var(--lt-ink);
+    }
+
+    80% {
+        color: var(--lt-accent-text);
+    }
+
+    100% {
+        color: var(--lt-ink);
+    }
+}
+
+html[data-theme="light"] .piece-ink {
+    animation-name: piece-lock-light;
+}
+
+/* Pergantian tema: silang pudar singkat (menimpa durasi transisi halaman) */
+html[data-vt="theme"]::view-transition-old(root) {
+    animation: lt-fade-out 0.32s ease both;
+}
+
+html[data-vt="theme"]::view-transition-new(root) {
+    animation: lt-fade-in 0.32s ease both;
+}
+
+@keyframes lt-fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes lt-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ==================== DIHASILKAN: pemetaan kelas Tailwind ==================== */
+html[data-theme="light"] .bg-\[\#0c0c0c\] {
+    background-color: var(--lt-bg)
+}
+
+html[data-theme="light"] .bg-\[\#101013\] {
+    background-color: var(--lt-surface)
+}
+
+html[data-theme="light"] .bg-\[\#121212\] {
+    background-color: var(--lt-surface)
+}
+
+html[data-theme="light"] .bg-\[\#121214\]\/90 {
+    background-color: color-mix(in srgb, var(--lt-surface) 90%, transparent)
+}
+
+html[data-theme="light"] .bg-\[\#121214\]\/95 {
+    background-color: color-mix(in srgb, var(--lt-surface) 95%, transparent)
+}
+
+html[data-theme="light"] .bg-\[\#121215\] {
+    background-color: var(--lt-surface)
+}
+
+html[data-theme="light"] .bg-\[\#141414\] {
+    background-color: var(--lt-surface)
+}
+
+html[data-theme="light"] .bg-\[\#141416\] {
+    background-color: var(--lt-surface)
+}
+
+html[data-theme="light"] .bg-\[\#141418\] {
+    background-color: var(--lt-surface)
+}
+
+html[data-theme="light"] .bg-\[\#16161a\] {
+    background-color: var(--lt-surface)
+}
+
+html[data-theme="light"] .bg-\[\#232327\] {
+    background-color: var(--lt-pill)
+}
+
+html[data-theme="light"] .bg-white\/10 {
+    background-color: rgba(22, 22, 26, 0.1)
+}
+
+html[data-theme="light"] .bg-white\/15 {
+    background-color: rgba(22, 22, 26, 0.15)
+}
+
+html[data-theme="light"] .bg-white\/20 {
+    background-color: rgba(22, 22, 26, 0.2)
+}
+
+html[data-theme="light"] .bg-white\/35 {
+    background-color: rgba(22, 22, 26, 0.35)
+}
+
+html[data-theme="light"] .bg-white\/5 {
+    background-color: rgba(22, 22, 26, 0.05)
+}
+
+html[data-theme="light"] .border-white {
+    border-color: var(--lt-ink)
+}
+
+html[data-theme="light"] .border-white\/10 {
+    border-color: rgba(22, 22, 26, 0.1)
+}
+
+html[data-theme="light"] .border-white\/15 {
+    border-color: rgba(22, 22, 26, 0.15)
+}
+
+html[data-theme="light"] .border-white\/20 {
+    border-color: rgba(22, 22, 26, 0.2)
+}
+
+html[data-theme="light"] .border-white\/25 {
+    border-color: rgba(22, 22, 26, 0.25)
+}
+
+html[data-theme="light"] .border-white\/30 {
+    border-color: rgba(22, 22, 26, 0.3)
+}
+
+html[data-theme="light"] .border-white\/40 {
+    border-color: rgba(22, 22, 26, 0.4)
+}
+
+html[data-theme="light"] .border-white\/5 {
+    border-color: rgba(22, 22, 26, 0.05)
+}
+
+html[data-theme="light"] .border-white\/50 {
+    border-color: rgba(22, 22, 26, 0.5)
+}
+
+html[data-theme="light"] .border-white\/70 {
+    border-color: rgba(22, 22, 26, 0.7)
+}
+
+html[data-theme="light"] .border-white\/80 {
+    border-color: rgba(22, 22, 26, 0.8)
+}
+
+html[data-theme="light"] .border-zinc-700 {
+    border-color: var(--lt-line-strong)
+}
+
+html[data-theme="light"] .border-zinc-700\/70 {
+    border-color: var(--lt-line-strong)
+}
+
+html[data-theme="light"] .border-zinc-800 {
+    border-color: var(--lt-line-strong)
+}
+
+html[data-theme="light"] .fill-white {
+    fill: var(--lt-ink)
+}
+
+html[data-theme="light"] .shadow-\[0_-15px_50px_rgba\(0\,0\,0\,0\.95\)\] {
+    --tw-shadow: 0 -15px 50px rgba(30, 30, 50, 0.247);
+    --tw-shadow-colored: 0 -15px 50px rgba(30, 30, 50, 0.247)
+}
+
+html[data-theme="light"] .shadow-\[0_0_10px_\#ffffff\] {
+    --tw-shadow: 0 0 10px var(--lt-ink);
+    --tw-shadow-colored: 0 0 10px var(--lt-ink)
+}
+
+html[data-theme="light"] .shadow-\[0_0_12px_\#ffffff\] {
+    --tw-shadow: 0 0 12px var(--lt-ink);
+    --tw-shadow-colored: 0 0 12px var(--lt-ink)
+}
+
+html[data-theme="light"] .shadow-\[0_10px_25px_rgba\(0\,0\,0\,0\.8\)\] {
+    --tw-shadow: 0 10px 25px rgba(30, 30, 50, 0.208);
+    --tw-shadow-colored: 0 10px 25px rgba(30, 30, 50, 0.208)
+}
+
+html[data-theme="light"] .shadow-\[0_15px_35px_rgba\(0\,0\,0\,0\.8\)\] {
+    --tw-shadow: 0 15px 35px rgba(30, 30, 50, 0.208);
+    --tw-shadow-colored: 0 15px 35px rgba(30, 30, 50, 0.208)
+}
+
+html[data-theme="light"] .shadow-\[0_20px_40px_rgba\(0\,0\,0\,0\.8\)\] {
+    --tw-shadow: 0 20px 40px rgba(30, 30, 50, 0.208);
+    --tw-shadow-colored: 0 20px 40px rgba(30, 30, 50, 0.208)
+}
+
+html[data-theme="light"] .shadow-\[0_20px_45px_rgba\(0\,0\,0\,0\.85\)\] {
+    --tw-shadow: 0 20px 45px rgba(30, 30, 50, 0.221);
+    --tw-shadow-colored: 0 20px 45px rgba(30, 30, 50, 0.221)
+}
+
+html[data-theme="light"] .shadow-\[0_20px_45px_rgba\(0\,0\,0\,0\.9\)\] {
+    --tw-shadow: 0 20px 45px rgba(30, 30, 50, 0.234);
+    --tw-shadow-colored: 0 20px 45px rgba(30, 30, 50, 0.234)
+}
+
+html[data-theme="light"] .shadow-\[0_20px_45px_rgba\(0\,0\,0\,0\.95\)\] {
+    --tw-shadow: 0 20px 45px rgba(30, 30, 50, 0.247);
+    --tw-shadow-colored: 0 20px 45px rgba(30, 30, 50, 0.247)
+}
+
+html[data-theme="light"] .shadow-\[0_20px_50px_rgba\(0\,0\,0\,0\.85\)\] {
+    --tw-shadow: 0 20px 50px rgba(30, 30, 50, 0.221);
+    --tw-shadow-colored: 0 20px 50px rgba(30, 30, 50, 0.221)
+}
+
+html[data-theme="light"] .shadow-\[0_20px_50px_rgba\(0\,0\,0\,0\.9\)\] {
+    --tw-shadow: 0 20px 50px rgba(30, 30, 50, 0.234);
+    --tw-shadow-colored: 0 20px 50px rgba(30, 30, 50, 0.234)
+}
+
+html[data-theme="light"] .shadow-\[0_25px_60px_rgba\(0\,0\,0\,0\.85\)\] {
+    --tw-shadow: 0 25px 60px rgba(30, 30, 50, 0.221);
+    --tw-shadow-colored: 0 25px 60px rgba(30, 30, 50, 0.221)
+}
+
+html[data-theme="light"] .shadow-\[0_25px_60px_rgba\(0\,0\,0\,0\.95\)\] {
+    --tw-shadow: 0 25px 60px rgba(30, 30, 50, 0.247);
+    --tw-shadow-colored: 0 25px 60px rgba(30, 30, 50, 0.247)
+}
+
+html[data-theme="light"] .shadow-\[0_25px_70px_rgba\(0\,0\,0\,0\.9\)\] {
+    --tw-shadow: 0 25px 70px rgba(30, 30, 50, 0.234);
+    --tw-shadow-colored: 0 25px 70px rgba(30, 30, 50, 0.234)
+}
+
+html[data-theme="light"] .shadow-\[0_2px_6px_rgba\(0\,0\,0\,0\.8\)\] {
+    --tw-shadow: 0 2px 6px rgba(30, 30, 50, 0.208);
+    --tw-shadow-colored: 0 2px 6px rgba(30, 30, 50, 0.208)
+}
+
+html[data-theme="light"] .shadow-\[0_30px_70px_rgba\(0\,0\,0\,0\.85\)\] {
+    --tw-shadow: 0 30px 70px rgba(30, 30, 50, 0.221);
+    --tw-shadow-colored: 0 30px 70px rgba(30, 30, 50, 0.221)
+}
+
+html[data-theme="light"] .shadow-\[0_6px_15px_rgba\(0\,0\,0\,0\.9\)\] {
+    --tw-shadow: 0 6px 15px rgba(30, 30, 50, 0.234);
+    --tw-shadow-colored: 0 6px 15px rgba(30, 30, 50, 0.234)
+}
+
+html[data-theme="light"] .shadow-\[0_7px_0_\#0c0c0c\,0_12px_18px_rgba\(0\,0\,0\,0\.45\)\] {
+    --tw-shadow: 0 7px 0 #0c0c0c, 0 12px 18px rgba(30, 30, 50, 0.117);
+    --tw-shadow-colored: 0 7px 0 #0c0c0c, 0 12px 18px rgba(30, 30, 50, 0.117)
+}
+
+html[data-theme="light"] .shadow-\[2px_2px_0_\#ffffff\] {
+    --tw-shadow: 2px 2px 0 var(--lt-ink);
+    --tw-shadow-colored: 2px 2px 0 var(--lt-ink)
+}
+
+html[data-theme="light"] .shadow-\[3px_3px_0px_white\] {
+    --tw-shadow: 3px 3px 0px var(--lt-ink);
+    --tw-shadow-colored: 3px 3px 0px var(--lt-ink)
+}
+
+html[data-theme="light"] .shadow-\[4px_4px_0_\#ffffff\] {
+    --tw-shadow: 4px 4px 0 var(--lt-ink);
+    --tw-shadow-colored: 4px 4px 0 var(--lt-ink)
+}
+
+html[data-theme="light"] .shadow-\[4px_4px_0px_white\] {
+    --tw-shadow: 4px 4px 0px var(--lt-ink);
+    --tw-shadow-colored: 4px 4px 0px var(--lt-ink)
+}
+
+html[data-theme="light"] .shadow-\[inset_0_2px_8px_rgba\(0\,0\,0\,0\.6\)\] {
+    --tw-shadow: inset 0 2px 8px rgba(30, 30, 50, 0.156);
+    --tw-shadow-colored: inset 0 2px 8px rgba(30, 30, 50, 0.156)
+}
+
+html[data-theme="light"] .shadow-\[inset_0_4px_8px_rgba\(0\,0\,0\,0\.55\)\] {
+    --tw-shadow: inset 0 4px 8px rgba(30, 30, 50, 0.143);
+    --tw-shadow-colored: inset 0 4px 8px rgba(30, 30, 50, 0.143)
+}
+
+html[data-theme="light"] .stroke-white {
+    stroke: var(--lt-ink)
+}
+
+html[data-theme="light"] .text-\[\#00f5d4\] {
+    color: #0a9a86
+}
+
+html[data-theme="light"] .text-\[\#22c55e\] {
+    color: #15803d
+}
+
+html[data-theme="light"] .text-\[\#fee440\] {
+    color: #a67c00
+}
+
+html[data-theme="light"] .text-\[\#ff1e56\] {
+    color: var(--lt-accent-text)
+}
+
+html[data-theme="light"] .text-\[\#ff1e56\]\/90 {
+    color: var(--lt-accent-text)
+}
+
+html[data-theme="light"] .text-neutral-200 {
+    color: var(--lt-ink2)
+}
+
+html[data-theme="light"] .text-neutral-300 {
+    color: var(--lt-ink2)
+}
+
+html[data-theme="light"] .text-neutral-400 {
+    color: var(--lt-ink2)
+}
+
+html[data-theme="light"] .text-neutral-500 {
+    color: var(--lt-ink3)
+}
+
+html[data-theme="light"] .text-neutral-600 {
+    color: var(--lt-ink3)
+}
+
+html[data-theme="light"] .text-white {
+    color: var(--lt-ink)
+}
+
+html[data-theme="light"] .text-white\/70 {
+    color: rgba(22, 22, 26, 0.7)
+}
+
+html[data-theme="light"] .text-white\/80 {
+    color: rgba(22, 22, 26, 0.8)
+}
+
+html[data-theme="light"] .text-white\/95 {
+    color: rgba(22, 22, 26, 0.95)
+}
+
+html[data-theme="light"] .text-zinc-300 {
+    color: var(--lt-ink2)
+}
+
+html[data-theme="light"] .text-zinc-400 {
+    color: var(--lt-ink2)
+}
+
+html[data-theme="light"] .text-zinc-500 {
+    color: var(--lt-ink3)
+}
+
+html[data-theme="light"] .text-zinc-600 {
+    color: var(--lt-ink3)
+}
+
+html[data-theme="light"] .focus-visible\:text-white:focus-visible {
+    color: var(--lt-ink)
+}
+
+html[data-theme="light"] .group:hover .group-hover\:border-white {
+    border-color: var(--lt-ink)
+}
+
+html[data-theme="light"] .group:hover .group-hover\:text-\[\#ff1e56\] {
+    color: var(--lt-accent-text)
+}
+
+html[data-theme="light"] .group:hover .group-hover\:text-white {
+    color: var(--lt-ink)
+}
+
+html[data-theme="light"] .hover\:bg-white\/10:hover {
+    background-color: rgba(22, 22, 26, 0.1)
+}
+
+html[data-theme="light"] .hover\:bg-white\/5:hover {
+    background-color: rgba(22, 22, 26, 0.05)
+}
+
+html[data-theme="light"] .hover\:border-white:hover {
+    border-color: var(--lt-ink)
+}
+
+html[data-theme="light"] .hover\:shadow-\[14px_14px_0_\#ffffff\]:hover {
+    --tw-shadow: 14px 14px 0 var(--lt-ink);
+    --tw-shadow-colored: 14px 14px 0 var(--lt-ink)
+}
+
+html[data-theme="light"] .hover\:text-\[\#ff1e56\]:hover {
+    color: var(--lt-accent-text)
+}
+
+html[data-theme="light"] .hover\:text-white:hover {
+    color: var(--lt-ink)
+}
+
+@media (min-width:1024px) {
+    html[data-theme="light"] .lg\:border-white\/10 {
+        border-color: rgba(22, 22, 26, 0.1)
+    }
+}
+
+@media (min-width:640px) {
+    html[data-theme="light"] .sm\:border-white {
+        border-color: var(--lt-ink)
+    }
+}

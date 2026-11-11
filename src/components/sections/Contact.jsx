@@ -37,7 +37,7 @@ export default function Contact() {
   return (
     <section id="contact" className="relative py-20 border-t border-white/10 select-none">
       <div className="mb-12">
-        <FireSectionBadge number="4" label="Contact ME" />
+        <FireSectionBadge number="3" label="Contact ME" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">

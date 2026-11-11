@@ -1,3 +1,4 @@
+import ThemeToggle from './ThemeToggle.jsx';
 import {
   Mail, Sparkles, Cpu, ChevronDown, Home, User, Briefcase,
   Image as ImageIcon
@@ -65,6 +66,7 @@ export default function Navbar({ activeNav, onNavClick }) {
           <Sparkles className="w-3.5 h-3.5 opacity-80 hidden md:inline-block" /> Works
         </a>
 
+
         <a
           href="#contact"
           onClick={(e) => { e.preventDefault(); onNavClick('home', '#contact'); }}
@@ -72,6 +74,9 @@ export default function Navbar({ activeNav, onNavClick }) {
         >
           <Mail className="w-3.5 h-3.5 opacity-80 hidden md:inline-block" /> Contact
         </a>
+
+        <span aria-hidden="true" className="w-px h-5 bg-white/15 mx-0.5" />
+        <ThemeToggle />
 
       </nav>
     </div>

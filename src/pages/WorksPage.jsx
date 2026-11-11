@@ -1,31 +1,41 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowUpRight, X, ChevronLeft, ChevronRight, Layers, Image as ImageIcon } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { FireSectionBadge, BrutalStar } from '../components/decor';
 import { PROJECTS_DATA, PROJECT_CATEGORIES } from '../data/projects.js';
+import LabSection from '../components/sections/LabSection.jsx';
 
 // ============================================================
 // HERO "WORKS": SERPIHAN HURUF JATUH SEPERTI TETRIS
+// 1) Garis fondasi merah ditarik.
+// 2) Kata dipecah menjadi serpihan 3-4 sel dari bentuk huruf aslinya.
+//    Serpihan jatuh dari atas, dari lapis terbawah ke atas, lalu mengunci
+//    (kilat merah saat mendarat, celah tipis antar serpihan tetap terlihat).
+// 3) Setelah semuanya terkunci: jeda singkat, lalu FINALE.
+//    'explode' = serpihan meledak keluar, kata utuh menghantam masuk (zoom).
+//    'zoom'    = serpihan memudar, kata utuh terzoom menembus layar lalu mengunci.
+// Geometri dihitung saat runtime dari font yang benar-benar dipakai
+// (canvas), jadi serpihan selalu mengikuti bentuk huruf Syne asli.
 // ============================================================
 const WORD = 'WORKS';
 const FINALE_MODE = 'explode'; // 'explode' | 'zoom'
 
 // Pengaturan waktu (ms)
-const START_MS = 500;
-const FALL_MS = 560;
-const HOLD_MS = 420;
-const BURST_MS = 700;
-const SLAM_MS = 650;
-const TARGET_BUILD_MS = 1900;
+const START_MS = 500; // jeda awal (garis fondasi ditarik)
+const FALL_MS = 560; // durasi satu serpihan jatuh sampai mengunci
+const HOLD_MS = 420; // jeda setelah serpihan terakhir mengunci
+const BURST_MS = 700; // durasi ledakan serpihan
+const SLAM_MS = 650; // durasi kata utuh masuk
+const TARGET_BUILD_MS = 1900; // total waktu menjatuhkan semua serpihan
 const MIN_STEP_MS = 30;
 const MAX_STEP_MS = 70;
 
 // Geometri
-const TRACKING_EM = -0.04;
+const TRACKING_EM = -0.04; // letter-spacing kata (em)
 const REF_FONT_PX = 200;
-const CELL_TARGET_DIV = 44;
+const CELL_TARGET_DIV = 44; // lebar kata dibagi angka ini = ukuran sel
 const CELL_MIN_PX = 12;
 const CELL_MAX_PX = 40;
-const SPAWN_EXTRA_PX = 220;
+const SPAWN_EXTRA_PX = 220; // serpihan mulai sejauh ini di atas kata
 const BEAM_EXTRA_PX = 140;
 
 const FALLBACK_FONT_SIZE = 'min(19vw, 15.5rem)';
@@ -45,6 +55,11 @@ let LAYOUT_COUNTER = 0;
 
 // ============================================================
 // SUARA (WEB AUDIO API, SINTETIS, TANPA FILE AUDIO)
+// - Fondasi : sapuan naik halus saat garis merah ditarik.
+// - Serpihan: "tok" plastik + klik tajam; nada naik seiring tumpukan menjulang.
+// - Finale  : ledakan (noise + dentuman rendah), benturan kata, denting logam.
+// - Tagline : denting kecil tanda selesai.
+// Semua dijadwalkan presisi di timeline audio agar sinkron dengan animasi CSS.
 // ============================================================
 const noiseCache = new WeakMap();
 
@@ -73,6 +88,7 @@ function ensureAudioCtx(ref) {
     return ref.current;
 }
 
+// Bus utama: gain (untuk mute) -> compressor (cegah clipping) -> output
 function createMaster(ctx, level) {
     const gain = ctx.createGain();
     gain.gain.value = level;
@@ -140,6 +156,7 @@ function noiseBurst(ctx, dest, { t, dur, peak, filterType = 'highpass', f0, f1 =
     src.stop(t + dur + 0.02);
 }
 
+// prog: 0 (lapis terbawah) .. 1 (paling atas) -> nada naik seiring tumpukan menjulang
 function playLockSound(ctx, dest, t, prog) {
     const f = 170 + prog * 300;
     tone(ctx, dest, { type: 'triangle', f0: f * 1.5, f1: f, t, dur: 0.11, peak: 0.15 });
@@ -152,6 +169,7 @@ function playFoundationSweep(ctx, dest, t) {
 
 function playFinale(ctx, dest, t) {
     const noiseFactor = FINALE_MODE === 'explode' ? 1 : 0.35;
+    // Ledakan: noise tersaring turun + dentuman sub-bass
     noiseBurst(ctx, dest, {
         t,
         dur: 0.7,
@@ -161,9 +179,11 @@ function playFinale(ctx, dest, t) {
         f1: 160,
     });
     tone(ctx, dest, { type: 'sine', f0: 110, f1: 38, t, dur: 0.6, peak: 0.5 });
+    // Benturan kata utuh saat masuk
     const hit = t + 0.2;
     tone(ctx, dest, { type: 'sine', f0: 150, f1: 48, t: hit, dur: 0.25, peak: 0.45 });
     noiseBurst(ctx, dest, { t: hit, dur: 0.12, peak: 0.15, filterType: 'lowpass', f0: 1800, f1: 300 });
+    // Denting logam halus
     tone(ctx, dest, { type: 'sine', f0: 1320, t: hit + 0.06, dur: 0.35, peak: 0.05 });
     tone(ctx, dest, { type: 'sine', f0: 1760, t: hit + 0.06, dur: 0.3, peak: 0.035 });
 }
@@ -173,6 +193,7 @@ function playTagDing(ctx, dest, t) {
     tone(ctx, dest, { type: 'sine', f0: 1320, t, dur: 0.12, peak: 0.03 });
 }
 
+// Jadwalkan seluruh suara satu putaran. elapsedMs = waktu yang sudah berjalan sejak animasi mulai.
 function scheduleRunSounds(ctx, dest, tl, elapsedMs) {
     const now = ctx.currentTime;
     const at = (ms) => {
@@ -193,6 +214,7 @@ function scheduleRunSounds(ctx, dest, tl, elapsedMs) {
     run(tl.tagDelay, (t) => playTagDing(ctx, dest, t));
 }
 
+// Hitung ukuran font, mask tinta huruf, lalu pecah menjadi serpihan
 function computeLayout(W, family, weight) {
     const probeCanvas = document.createElement('canvas');
     const pctx = probeCanvas.getContext('2d');
@@ -221,6 +243,7 @@ function computeLayout(W, family, weight) {
     const lineHeight = fontAscent + fontDescent;
     const textTop = -(fontAscent - inkAscent);
 
+    // --- Mask tinta huruf pada ukuran sebenarnya ---
     const cw_px = Math.ceil(W);
     const ch_px = Math.ceil(H);
     const maskCanvas = document.createElement('canvas');
@@ -236,6 +259,7 @@ function computeLayout(W, family, weight) {
     mctx.fillText(WORD, textLeft, inkAscent);
     const data = mctx.getImageData(0, 0, cw_px, ch_px).data;
 
+    // --- Grid sel ---
     const cellTarget = Math.min(CELL_MAX_PX, Math.max(CELL_MIN_PX, W / CELL_TARGET_DIV));
     const cols = Math.max(8, Math.round(W / cellTarget));
     const cw = W / cols;
@@ -262,6 +286,7 @@ function computeLayout(W, family, weight) {
         }
     }
 
+    // --- Pecah sel tinta menjadi serpihan 3-4 sel (tumbuh dari bawah-kiri) ---
     const rand = mulberry32(20261102);
     const owner = Array.from({ length: rows }, () => Array(cols).fill(-1));
     const dirs = [
@@ -302,7 +327,7 @@ function computeLayout(W, family, weight) {
     const ownerAt = (r, c) =>
         r < 0 || c < 0 || r >= rows || c >= cols ? -1 : owner[r][c];
 
-    const gap = Math.max(1.6, cw * 0.09);
+    const gap = Math.max(1.6, cw * 0.09); // total celah antar serpihan
     const sameOverlap = 0.3;
     const emptyExtend = cw * 0.12;
     const adj = (neighborOwner, selfId) => {
@@ -352,6 +377,7 @@ function computeLayout(W, family, weight) {
         };
     });
 
+    // Urutan jatuh: lapis terbawah dulu, lalu dari kiri ke kanan
     pieces.sort((a, b) => b.maxRow - a.maxRow || a.minCol - b.minCol);
 
     const n = pieces.length;
@@ -380,333 +406,113 @@ function computeLayout(W, family, weight) {
 }
 
 // ============================================================
-// MODAL DETAIL PROYEK (DARI ProjectDetail.jsx DENGAN CAROUSEL GAMBAR)
+// KARTU PROYEK (gambar depan dari project.image, fallback poster teks)
 // ============================================================
-function BrutalProjectDetailModal({ project, onClose }) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [imgErrorMap, setImgErrorMap] = useState({});
-
-    useEffect(() => {
-        setCurrentImageIndex(0);
-        setImgErrorMap({});
-    }, [project]);
-
-    const images =
-        project?.images && project.images.length > 0
-            ? project.images
-            : [project?.image].filter(Boolean);
-
-    const totalImages = images.length;
-
-    // Navigasi keyboard (ArrowLeft, ArrowRight, Escape)
-    useEffect(() => {
-        if (!project) return undefined;
-        const handleKey = (e) => {
-            if (e.key === 'Escape') onClose();
-            if (totalImages > 1 && e.key === 'ArrowRight') {
-                setCurrentImageIndex((prev) => (prev + 1) % totalImages);
-            }
-            if (totalImages > 1 && e.key === 'ArrowLeft') {
-                setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
-            }
-        };
-        window.addEventListener('keydown', handleKey);
-        return () => window.removeEventListener('keydown', handleKey);
-    }, [project, totalImages, onClose]);
-
-    if (!project) return null;
-
-    const nextImage = (e) => {
-        e.stopPropagation();
-        setCurrentImageIndex((prev) => (prev + 1) % totalImages);
-    };
-
-    const prevImage = (e) => {
-        e.stopPropagation();
-        setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
-    };
-
-    const currentSrc = images[currentImageIndex];
-    const hasImgError = imgErrorMap[currentImageIndex];
-    const toolList = project.tools || project.tags || [];
+function ProjectCard({ project, onOpen }) {
+    const [thumbErr, setThumbErr] = useState(false);
+    const src = project.image || (project.images && project.images[0]);
+    const showImg = Boolean(src) && !thumbErr;
+    const title = project.title || project.name;
+    const accent = project.accent || '#ff1e56';
 
     return (
         <div
-            onClick={onClose}
-            className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fade-in"
+            onClick={onOpen}
+            className="group relative bg-[#141414] border-2 border-white/20 hover:border-white p-6 sm:p-8 transition-all duration-300 cursor-pointer hover:-translate-y-2 shadow-[0_15px_35px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between"
         >
+            {/* Efek Glare Halus */}
+            <div className="absolute inset-0 plastic-glare opacity-40 group-hover:opacity-80 transition-opacity pointer-events-none" />
+
+            {/* Header Kartu Proyek */}
+            <div className="relative z-10 flex items-center justify-between text-[10px] font-mono text-neutral-400 mb-5 pb-3 border-b border-dashed border-white/20 uppercase">
+                <span className="font-bold text-white">{project.code || project.category}</span>
+                <span className="px-2 py-0.5 bg-white/10 text-white rounded-sm">{project.year}</span>
+            </div>
+
+            {/* Gambar proyek (fallback: poster teks) */}
             <div
-                onClick={(e) => e.stopPropagation()}
-                className="relative w-full max-w-[1150px] max-h-[92vh] overflow-y-auto bg-[#141414] border-2 border-white shadow-[12px_12px_0_#ff1e56] text-white"
+                className="relative z-10 h-64 sm:h-72 w-full mb-6 overflow-hidden border border-white/15 group-hover:border-white transition-colors bg-[#090909]"
+                style={{ background: `radial-gradient(circle at 80% 20%, ${accent}33 0%, #090909 75%)` }}
             >
-                {/* Tombol Close */}
-                <button
-                    type="button"
-                    onClick={onClose}
-                    aria-label="Close detail"
-                    className="absolute top-4 right-4 z-30 w-11 h-11 bg-black/80 hover:bg-[#ff1e56] text-white border-2 border-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-[4px_4px_0_#0c0c0c]"
-                >
-                    <X className="w-5 h-5" />
-                </button>
-
-                {/* ===========================================
-                    AREA CAROUSEL GAMBAR (BESAR & JELAS)
-                   =========================================== */}
-                <div className="relative w-full h-[300px] sm:h-[440px] md:h-[500px] bg-[#0a0a0a] border-b-2 border-white/20 flex items-center justify-center overflow-hidden">
-                    {!hasImgError && currentSrc ? (
-                        <img
-                            src={currentSrc}
-                            alt={`${project.detailTitle || project.name || project.title} - ${currentImageIndex + 1}`}
-                            onError={() =>
-                                setImgErrorMap((prev) => ({ ...prev, [currentImageIndex]: true }))
-                            }
-                            className="w-full h-full object-contain bg-[#0a0a0a] select-none"
-                        />
-                    ) : (
-                        <div className="flex flex-col items-center justify-center text-center p-8">
-                            <ImageIcon className="w-12 h-12 text-[#ff1e56] mb-3 opacity-80" />
-                            <p className="font-syne font-black text-xl sm:text-2xl uppercase text-white">
-                                {project.detailTitle || project.name || project.title}
-                            </p>
-                            <p className="font-mono text-xs text-zinc-400 mt-2">
-                                Slide {currentImageIndex + 1} / {totalImages} — Simpan gambar di folder{' '}
-                                <code className="text-[#ff1e56]">src/assets/</code>
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Badge Nomor Slide di Pojok Kiri Atas */}
-                    <div className="absolute top-4 left-4 z-20 bg-black/80 border border-white/30 px-3 py-1 font-mono text-xs text-white uppercase tracking-widest">
-                        SLIDE {String(currentImageIndex + 1).padStart(2, '0')} /{' '}
-                        {String(totalImages).padStart(2, '0')}
-                    </div>
-
-                    {/* Tombol Kiri & Kanan (Hanya muncul jika > 1 gambar) */}
-                    {totalImages > 1 && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={prevImage}
-                                aria-label="Previous image"
-                                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-black/75 hover:bg-[#ff1e56] text-white border-2 border-white/60 hover:border-white flex items-center justify-center transition-all cursor-pointer shadow-[4px_4px_0_#0c0c0c]"
-                            >
-                                <ChevronLeft className="w-6 h-6" />
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={nextImage}
-                                aria-label="Next image"
-                                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-black/75 hover:bg-[#ff1e56] text-white border-2 border-white/60 hover:border-white flex items-center justify-center transition-all cursor-pointer shadow-[4px_4px_0_#0c0c0c]"
-                            >
-                                <ChevronRight className="w-6 h-6" />
-                            </button>
-
-                            {/* Indikator Bar / Dots Gambar */}
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/80 border border-white/25 px-3.5 py-2">
-                                {images.map((_, idx) => (
-                                    <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setCurrentImageIndex(idx);
-                                        }}
-                                        aria-label={`Go to slide ${idx + 1}`}
-                                        className={`h-2 transition-all duration-300 cursor-pointer ${idx === currentImageIndex
-                                            ? 'w-7 bg-[#ff1e56]'
-                                            : 'w-2.5 bg-white/35 hover:bg-white/70'
-                                            }`}
-                                    />
-                                ))}
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* ===========================================
-                    KONTEN DETAIL PROYEK
-                   =========================================== */}
-                <div className="p-6 sm:p-10">
-                    {/* Header Kategori, Subtitle & Tahun */}
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                        <span
-                            className="px-3 py-1 font-mono font-bold text-xs uppercase tracking-wider text-black border border-white"
-                            style={{ backgroundColor: project.accent || '#ff1e56' }}
-                        >
-                            {project.category || 'Web Application'}
-                        </span>
-
-                        {project.desc && (
-                            <span className="px-3 py-1 font-mono text-xs text-zinc-300 bg-white/5 border border-white/15">
-                                {project.desc}
-                            </span>
-                        )}
-
-                        <span className="font-mono text-xs font-bold text-[#ff1e56] ml-auto">
-                            YEAR // {project.year || '2025'}
-                        </span>
-                    </div>
-
-                    {/* Judul Lengkap Proyek */}
-                    <h2 className="font-syne font-black text-2xl sm:text-4xl text-white uppercase tracking-tight leading-tight mb-4">
-                        {project.detailTitle || project.name || project.title}
-                    </h2>
-
-                    {/* Deskripsi Detail Proyek */}
-                    <p className="font-sans text-sm sm:text-base text-zinc-300 leading-relaxed mb-8 border-l-2 border-[#ff1e56] pl-4">
-                        {project.detailDesc || project.description || project.desc}
-                    </p>
-
-                    {/* Tools & Technologies */}
-                    <div>
-                        <h4 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#ff1e56] mb-3">
-                            Tools &amp; Technologies
-                        </h4>
-                        <div className="flex flex-wrap gap-2.5">
-                            {toolList.map((tech, i) => (
-                                <span
-                                    key={i}
-                                    className="px-3.5 py-1.5 font-mono text-xs font-bold uppercase bg-white/5 border border-white/25 text-white shadow-[3px_3px_0_#ff1e56]"
-                                >
-                                    {tech}
-                                </span>
-                            ))}
+                {showImg ? (
+                    <img
+                        src={src}
+                        alt={title}
+                        onError={() => setThumbErr(true)}
+                        className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                        draggable="false"
+                    />
+                ) : (
+                    <div className="absolute inset-0 px-5 pt-14 pb-14 flex items-center">
+                        <div className="font-syne font-black text-2xl sm:text-3xl lg:text-4xl uppercase tracking-tight text-white break-words">
+                            {title}
                         </div>
                     </div>
+                )}
+
+                {/* Gradasi tipis agar badge tetap terbaca di atas gambar */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+
+                <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+                    <span
+                        className="px-2.5 py-1 text-[10px] font-syne font-black uppercase tracking-widest text-[#0c0c0c] border border-black shadow-[2px_2px_0_#0c0c0c]"
+                        style={{ backgroundColor: accent }}
+                    >
+                        {project.category}
+                    </span>
+                    <BrutalStar
+                        color={accent}
+                        className="w-8 h-8 group-hover:rotate-45 transition-transform drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]"
+                    />
                 </div>
+
+                <div className="absolute bottom-3.5 left-4 right-4 flex items-center justify-between text-[10px] font-mono text-white pointer-events-none">
+                    <span className="bg-black/80 border border-white/25 px-2.5 py-1">CLICK TO INSPECT</span>
+                    <span className="flex items-center gap-1 bg-[#ff1e56] border border-white/40 px-2.5 py-1 font-bold group-hover:translate-x-1 transition-transform">
+                        VIEW CASE <ArrowUpRight className="w-4 h-4" />
+                    </span>
+                </div>
+            </div>
+
+            {/* Judul di bawah gambar (hanya jika gambar tampil, agar tidak dobel dengan poster teks) */}
+            {showImg && (
+                <h3 className="relative z-10 font-syne font-black text-xl sm:text-2xl uppercase tracking-tight text-white group-hover:text-[#ff1e56] transition-colors leading-snug mb-3">
+                    {title}
+                </h3>
+            )}
+
+            {/* Deskripsi Singkat */}
+            <p className="relative z-10 font-sans text-sm text-neutral-300 mb-6 line-clamp-3 leading-relaxed flex-1">
+                {project.description}
+            </p>
+
+            {/* Tags */}
+            <div className="relative z-10 flex flex-wrap gap-2 mt-auto">
+                {(project.tags || []).map((tag) => (
+                    <span
+                        key={tag}
+                        className="text-[10px] sm:text-xs font-mono px-2.5 py-1 bg-white/5 border border-white/15 text-neutral-300 uppercase"
+                    >
+                        #{tag}
+                    </span>
+                ))}
             </div>
         </div>
     );
 }
 
-// ============================================================
-// KARTU PROYEK (2 KOLOM DENGAN THUMBNAIL GAMBAR ASLI)
-// ============================================================
-function ProjectCard({ project, onOpenDetail }) {
-    const [thumbErr, setThumbErr] = useState(false);
-    const slideCount = project.images ? project.images.length : 1;
-    const toolList = project.tools || project.tags || [];
-
-    return (
-        <article
-            onClick={() => onOpenDetail(project)}
-            className="group relative bg-[#141414] border-2 border-white/20 hover:border-white p-6 sm:p-7 transition-all duration-300 cursor-pointer hover:-translate-y-2 shadow-[0_15px_35px_rgba(0,0,0,0.85)] hover:shadow-[8px_8px_0_#ff1e56] overflow-hidden flex flex-col justify-between"
-        >
-            {/* Efek Glare Halus */}
-            <div className="absolute inset-0 plastic-glare opacity-30 group-hover:opacity-70 transition-opacity pointer-events-none" />
-
-            {/* Header Kartu Proyek */}
-            <div className="relative z-10 flex items-center justify-between text-[11px] font-mono text-neutral-400 mb-4 pb-3 border-b border-dashed border-white/20 uppercase">
-                <span className="font-bold text-white">
-                    {project.code || project.category}
-                </span>
-                <span className="px-2.5 py-0.5 bg-white/10 text-white font-bold">
-                    {project.year}
-                </span>
-            </div>
-
-            {/* Area Gambar Preview Proyek */}
-            <div
-                className="relative z-10 h-60 sm:h-72 w-full mb-6 overflow-hidden border-2 border-white/20 group-hover:border-white transition-colors bg-[#090909]"
-                style={{
-                    background: `radial-gradient(circle at 80% 20%, ${project.accent || '#ff1e56'
-                        }33 0%, #090909 75%)`,
-                }}
-            >
-                {!thumbErr && project.image ? (
-                    <img
-                        src={project.image}
-                        alt={project.name || project.title}
-                        onError={() => setThumbErr(true)}
-                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                    />
-                ) : (
-                    /* Fallback Poster jika file gambar belum disalin ke src/assets/ */
-                    <div className="w-full h-full p-6 flex flex-col justify-between">
-                        <div className="my-auto">
-                            <span className="font-mono text-[10px] uppercase tracking-widest text-[#ff1e56] block mb-1">
-                                {project.desc}
-                            </span>
-                            <div className="font-syne font-black text-2xl sm:text-3xl uppercase tracking-tight text-white">
-                                {project.name || project.title}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Gradient Overlay Halus di Atas Gambar */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
-
-                {/* Baris Badge Atas Gambar */}
-                <div className="absolute top-3.5 left-3.5 right-3.5 flex items-start justify-between gap-2 pointer-events-none">
-                    <span
-                        className="px-2.5 py-1 text-[10px] font-syne font-black uppercase tracking-widest text-[#0c0c0c] border border-black shadow-[2px_2px_0_#0c0c0c]"
-                        style={{ backgroundColor: project.accent || '#ff1e56' }}
-                    >
-                        {project.category}
-                    </span>
-
-                    <BrutalStar
-                        color={project.accent || '#ff1e56'}
-                        className="w-7 h-7 group-hover:rotate-45 transition-transform drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]"
-                    />
-                </div>
-
-                {/* Baris Info Bawah Gambar */}
-                <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between text-[10px] font-mono text-white">
-                    <span className="inline-flex items-center gap-1.5 bg-black/80 border border-white/25 px-2.5 py-1">
-                        <Layers className="w-3 h-3 text-[#ff1e56]" />
-                        {slideCount} {slideCount > 1 ? 'SCREENSHOTS' : 'SCREENSHOT'}
-                    </span>
-
-                    <span className="inline-flex items-center gap-1 bg-[#ff1e56] text-white font-bold px-2.5 py-1 border border-white/40 group-hover:translate-x-1 transition-transform">
-                        VIEW DETAILS <ArrowUpRight className="w-3.5 h-3.5" />
-                    </span>
-                </div>
-            </div>
-
-            {/* Subtitle & Judul Proyek */}
-            <div className="relative z-10 mb-3">
-                {project.desc && (
-                    <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#ff1e56] block mb-1">
-                        {project.desc}
-                    </span>
-                )}
-                <h3 className="font-syne font-black text-xl sm:text-2xl uppercase tracking-tight text-white group-hover:text-[#ff1e56] transition-colors leading-snug">
-                    {project.name || project.title}
-                </h3>
-            </div>
-
-            {/* Deskripsi Detail */}
-            <p className="relative z-10 font-sans text-xs sm:text-sm text-neutral-300 mb-6 line-clamp-3 leading-relaxed flex-1">
-                {project.detailDesc || project.description}
-            </p>
-
-            {/* Tools & Technologies Tags */}
-            <div className="relative z-10 flex flex-wrap gap-2 mt-auto pt-4 border-t border-white/10">
-                {toolList.map((tag) => (
-                    <span
-                        key={tag}
-                        className="text-[10px] sm:text-xs font-mono px-2.5 py-1 bg-white/5 border border-white/15 text-neutral-200 uppercase"
-                    >
-                        {tag}
-                    </span>
-                ))}
-            </div>
-        </article>
-    );
-}
-
-export default function WorksPage() {
+export default function WorksPage({ onSelectProject, onHire }) {
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const [detailProject, setDetailProject] = useState(null);
+    // Kunci untuk memutar ulang animasi
     const [runId, setRunId] = useState(0);
+    // 'pending' | 'ready' | 'failed'
     const [status, setStatus] = useState('pending');
     const [layout, setLayout] = useState(null);
     const [width, setWidth] = useState(0);
+    // 'build' | 'finale' | 'done'
     const [phase, setPhase] = useState('done');
     const [placed, setPlaced] = useState(0);
+    // Suara: aktif secara bawaan, pilihan disimpan di browser
     const [soundOn, setSoundOn] = useState(() => {
         try {
             return window.localStorage.getItem('works-sound') !== 'off';
@@ -721,6 +527,7 @@ export default function WorksPage() {
     const masterRef = useRef(null);
     const soundOnRef = useRef(soundOn);
 
+    // Sinkronkan status suara ke bus audio yang sedang berjalan
     useEffect(() => {
         soundOnRef.current = soundOn;
         if (masterRef.current) masterRef.current.setLevel(soundOn ? 1 : 0);
@@ -731,6 +538,7 @@ export default function WorksPage() {
         }
     }, [soundOn]);
 
+    // Tutup AudioContext saat meninggalkan halaman
     useEffect(() => {
         return () => {
             const ctx = audioCtxRef.current;
@@ -741,10 +549,12 @@ export default function WorksPage() {
 
     const toggleSound = () => {
         setSoundOn((v) => !v);
+        // Klik adalah gestur pengguna: izinkan audio berjalan jika sempat diblokir browser
         const ctx = audioCtxRef.current;
         if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => { });
     };
 
+    // Pantau lebar kontainer (debounce)
     useEffect(() => {
         const el = wrapRef.current;
         if (!el) return undefined;
@@ -766,6 +576,7 @@ export default function WorksPage() {
         };
     }, []);
 
+    // Hitung geometri setelah font siap
     useEffect(() => {
         if (!width) return undefined;
         let cancelled = false;
@@ -800,6 +611,7 @@ export default function WorksPage() {
         };
     }, [width]);
 
+    // Jalankan penanda fase (hanya untuk teks penghitung)
     useEffect(() => {
         if (!layout) return undefined;
         if (
@@ -820,6 +632,7 @@ export default function WorksPage() {
         timers.push(setTimeout(() => setPhase('finale'), finaleDelay));
         timers.push(setTimeout(() => setPhase('done'), doneAt));
 
+        // Suara dijadwalkan presisi lewat Web Audio, sinkron dengan animasi CSS
         const startPerf = performance.now();
         let cancelled = false;
         let master = null;
@@ -971,14 +784,23 @@ export default function WorksPage() {
             <main className="relative flex-1 w-full max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-14 pt-28 pb-24">
 
                 {/* =====================================================================
-                    1. HERO: SERPIHAN "WORKS" JATUH SEPERTI TETRIS
-                   ===================================================================== */}
+            1. HERO: SERPIHAN "WORKS" JATUH SEPERTI TETRIS
+           ===================================================================== */}
                 <section className="relative w-full mb-20">
+                    {/* Baris meta tunggal dengan garis tipis */}
                     <div className="flex items-center justify-between pb-4 mb-6 sm:mb-10 border-b border-white/15 font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] text-zinc-400">
                         <span>Index / Selected Works</span>
+                        <a
+                            href="#lab"
+                            onClick={(e) => { e.preventDefault(); document.getElementById('lab')?.scrollIntoView({ behavior: 'smooth' }); }}
+                            className="hidden sm:inline-flex items-center gap-2 text-[#22c55e] hover:text-white transition-colors"
+                        >
+                            Coba demo di Lab <span aria-hidden="true">&darr;</span>
+                        </a>
                         <span className="text-white tabular-nums">{metaRight}</span>
                     </div>
 
+                    {/* Probe tak terlihat: membaca font Syne yang dipakai */}
                     <span
                         ref={probeRef}
                         aria-hidden="true"
@@ -987,6 +809,7 @@ export default function WorksPage() {
                         W
                     </span>
 
+                    {/* Kanvas kata */}
                     <div
                         ref={wrapRef}
                         key={runKey}
@@ -1000,6 +823,7 @@ export default function WorksPage() {
                             minHeight: status === 'pending' ? '9rem' : undefined,
                         }}
                     >
+                        {/* Cadangan jika perhitungan gagal: kata utuh biasa */}
                         {status === 'failed' && (
                             <span
                                 aria-hidden="true"
@@ -1012,8 +836,10 @@ export default function WorksPage() {
 
                         {ready && (
                             <>
+                                {/* Serpihan yang jatuh */}
                                 {layout.pieces.map((p, k) => (
                                     <div key={p.id}>
+                                        {/* Garis jatuh samar */}
                                         <div
                                             aria-hidden="true"
                                             className="piece-beam pointer-events-none absolute"
@@ -1050,6 +876,7 @@ export default function WorksPage() {
                                     </div>
                                 ))}
 
+                                {/* Kata utuh: masuk saat finale */}
                                 <div
                                     aria-hidden="true"
                                     className="solid-word pointer-events-none absolute inset-0"
@@ -1071,6 +898,7 @@ export default function WorksPage() {
                         )}
                     </div>
 
+                    {/* Garis fondasi merah: ditarik pertama, berdenyut saat finale */}
                     <div
                         key={`rule-${runKey}`}
                         aria-hidden="true"
@@ -1080,6 +908,7 @@ export default function WorksPage() {
                         <div className="hero-rule-inner w-full h-full bg-[#ff1e56]" />
                     </div>
 
+                    {/* Tagline + petunjuk */}
                     <div className="flex items-center justify-between gap-4 mt-6">
                         <span
                             key={`tag-${runKey}`}
@@ -1107,13 +936,13 @@ export default function WorksPage() {
                 </section>
 
                 {/* =====================================================================
-                    2. BARIS FILTER KATEGORI & SUB-HEADER SHOWCASE
-                   ===================================================================== */}
-                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+            2. BARIS FILTER KATEGORI & SUB-HEADER SHOWCASE
+           ===================================================================== */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
                     <div>
-                        <FireSectionBadge number="3" label="LATEST PROJECTS" />
+                        <FireSectionBadge number="3" label="ARCHIVE & SHOWCASE" />
                         <p className="font-mono text-xs text-zinc-400 mt-2 max-w-lg">
-                            My recent work and projects — click any project card to inspect full screenshots and technical architecture.
+                            Setiap proyek dirancang melalui tahapan riset, perancangan arsitektur, hingga implementasi kode berstandar produksi.
                         </p>
                     </div>
 
@@ -1124,7 +953,7 @@ export default function WorksPage() {
                                 key={cat}
                                 type="button"
                                 onClick={() => setSelectedCategory(cat)}
-                                className={`px-3.5 py-2 text-xs font-mono uppercase tracking-wider border-2 transition-all cursor-pointer ${selectedCategory === cat
+                                className={`px-4 py-2 text-xs font-mono uppercase tracking-wider border-2 transition-all cursor-pointer ${selectedCategory === cat
                                     ? 'bg-[#ff1e56] text-white border-[#ff1e56] font-bold shadow-[4px_4px_0px_white]'
                                     : 'bg-[#141414] text-neutral-300 border-zinc-700 hover:border-white hover:text-white'
                                     }`}
@@ -1136,26 +965,20 @@ export default function WorksPage() {
                 </div>
 
                 {/* =====================================================================
-                    3. GRID PROYEK (2 CARD PER KOLOM DENGAN PREVIEW GAMBAR)
-                   ===================================================================== */}
+            3. GRID PROYEK (2 CARD PER BARIS / KOLOM PENUH & PROPORSIONAL)
+           ===================================================================== */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10">
                     {filteredProjects.map((project) => (
                         <ProjectCard
-                            key={project.id || project.name}
+                            key={project.id}
                             project={project}
-                            onOpenDetail={setDetailProject}
+                            onOpen={() => onSelectProject(project)}
                         />
                     ))}
                 </div>
-            </main>
 
-            {/* =====================================================================
-                4. MODAL DETAIL PROYEK DENGAN IMAGE SLIDER (ProjectDetail)
-               ===================================================================== */}
-            <BrutalProjectDetailModal
-                project={detailProject}
-                onClose={() => setDetailProject(null)}
-            />
+                <LabSection onHire={onHire} />
+            </main>
         </div>
     );
 }

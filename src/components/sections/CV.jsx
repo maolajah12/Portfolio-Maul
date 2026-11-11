@@ -3,6 +3,42 @@ import EducationCard from './cv/EducationCard.jsx';
 import ExperienceCard from './cv/ExperienceCard.jsx';
 import { FireSectionBadge, SmileyDoodle } from '../decor';
 
+// Bunyi tekan tombol (sama dengan tombol "PRESS TO ENTER" di gerbang awal); mengikuti pengaturan 'signSfx'.
+let pressCtx = null;
+
+function playPressSound() {
+  try {
+    if (localStorage.getItem('signSfx') === 'off') return;
+  } catch { /* abaikan */ }
+
+  const AC = typeof window !== 'undefined' ? window.AudioContext || window.webkitAudioContext : null;
+  if (!AC) return;
+
+  try {
+    if (!pressCtx || pressCtx.state === 'closed') pressCtx = new AC();
+    pressCtx.resume().catch(() => { });
+
+    const when = pressCtx.currentTime + 0.01;
+    const out = pressCtx.createGain();
+    out.gain.value = 0.9;
+    out.connect(pressCtx.destination);
+
+    const osc = pressCtx.createOscillator();
+    const g = pressCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, when);
+    osc.frequency.exponentialRampToValueAtTime(160, when + 0.12);
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(0.14, when + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.2);
+    osc.connect(g);
+    g.connect(out);
+    osc.start(when);
+    osc.stop(when + 0.22);
+  } catch { /* abaikan */ }
+}
+
+
 export default function CV() {
   const [isPressed, setIsPressed] = useState(false);
   const [isSmashing, setIsSmashing] = useState(false);
@@ -14,11 +50,12 @@ export default function CV() {
     if (isSmashing) return;
 
     setIsSmashing(true);
+    playPressSound();
 
     setTimeout(() => {
       const link = document.createElement('a');
-      link.href = '/CV_Maulana Al Ghifari.pdf';
-      link.download = 'CV_Maulana Al Ghifari.pdf';
+      link.href = '/CV_inggris maulana.pdf';
+      link.download = 'Maulana_Al_Ghifari_CV.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -64,7 +101,7 @@ export default function CV() {
                 }}
                 className={`group relative w-full bg-[#e6e6e6] border-[3px] border-[#0c0c0c] p-5 sm:p-6 cursor-pointer transition-transform duration-75 ${activeDown ? 'translate-y-[3px] bg-[#dcdcdc]' : 'hover:bg-white'
                   }`}
-                title="Smash to Download CV_Maulana Al Ghifari.pdf"
+                title="Smash to Download CV_inggris maulana.pdf"
               >
                 {/* Baut Sudut Industrial */}
                 <span className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-zinc-500 border border-black" />
@@ -147,7 +184,7 @@ export default function CV() {
               {/* Pernak-pernik Data & Barcode */}
               <div className="flex flex-wrap items-end justify-between gap-4 border-t border-dashed border-zinc-700 pt-5 mt-6">
                 <div className="flex flex-col gap-1.5 font-mono text-xs sm:text-[13px] text-zinc-300 uppercase tracking-widest">
-                  <span>FILE: CV_MAULANA AL GHIFARI.PDF</span>
+                  <span>FILE: CV_INGGRIS MAULANA.PDF</span>
                   <span>DEGREE: D3 INFORMATICS (GPA 3.72)</span>
                   <span className="text-[#ff1e56] font-bold">
                     STACK: LARAVEL • REACT • PYTHON
